@@ -1,20 +1,54 @@
-# Auth.js v5 — OAuth con Next.js, Prisma y PostgreSQL
+# NXAuth — Autenticación OAuth con Next.js 15 y Auth.js v5
 
-Proyecto de referencia para autenticación OAuth completa en Next.js 15 usando Auth.js v5. Incluye login con Google y GitHub, sesiones JWT, control de roles (USER / ADMIN), adaptador Prisma y páginas de auth personalizadas.
+![Next.js](https://img.shields.io/badge/Next.js_15-black?style=flat-square&logo=next.js)
+![Auth.js](https://img.shields.io/badge/Auth.js_v5-purple?style=flat-square&logo=authjs)
+![Prisma](https://img.shields.io/badge/Prisma_6-2D3748?style=flat-square&logo=prisma)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![React](https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Demo](https://img.shields.io/badge/demo-activo-green?style=flat-square)
+
+Implementación completa de autenticación OAuth en Next.js 15 con App Router. Login con Google y GitHub, sesiones JWT con control de roles `USER / ADMIN`, protección de rutas en servidor y persistencia con Prisma sobre PostgreSQL.
+
+**Incluye modo demo funcional — sin base de datos ni credenciales OAuth.**
 
 ---
 
-## Stack tecnológico
+## Capturas
 
-| Capa | Tecnología |
-|---|---|
-| Framework | Next.js 15 (App Router) |
-| Autenticación | Auth.js v5 (next-auth beta) |
-| Base de datos | PostgreSQL |
-| ORM | Prisma 6 |
-| Adapter | @auth/prisma-adapter |
-| Estilos | CSS puro (variables, sin framework) |
-| Runtime | Node.js / React 19 |
+### Panel de administración
+![Admin](docs/images/admin.png)
+
+### Dashboard de usuario
+![Dashboard](docs/images/dashboard.png)
+
+### Home
+![Home](docs/images/home.png)
+
+---
+
+## Qué demuestra este proyecto
+
+Este proyecto no es un tutorial seguido línea a línea. Resuelve problemas reales que aparecen cuando se implementa autenticación en producción:
+
+- **Configuración de Auth.js v5 (beta)** con adaptador Prisma, callbacks JWT personalizados e inyección de roles en el token — no la configuración mínima de la documentación oficial.
+- **Control de acceso por rol en servidor**: las rutas `/dashboard` y `/admin` comprueban la sesión antes de renderizar. Sin middleware adicional, sin client-side guards que se puedan saltarse.
+- **Modo demo con zero dependencias**: implementado con `dynamic import` para que `Prisma` y `Auth.js` nunca se carguen en modo demo. Ninguna variable de entorno crítica requerida para ejecutar el proyecto.
+- **Server Actions para autenticación**: `loginGoogle()`, `loginGithub()` y `logout()` son Server Actions — sin endpoints API propios, sin `fetch()` desde el cliente.
+- **Modelo de datos OAuth**: schema Prisma con relación `User → Account[]` siguiendo la especificación de Auth.js, con `onDelete: Cascade` y constraint `@@unique([provider, providerAccountId])`.
+
+---
+
+## Stack
+
+| Capa | Tecnología | Versión |
+|---|---|---|
+| Framework | Next.js — App Router | 15 |
+| Autenticación | Auth.js (next-auth) | v5 beta |
+| Base de datos | PostgreSQL | — |
+| ORM | Prisma | 6 |
+| Adapter | @auth/prisma-adapter | 2 |
+| Estilos | CSS puro con variables | — |
+| Runtime | React | 19 |
 
 ---
 
@@ -22,138 +56,134 @@ Proyecto de referencia para autenticación OAuth completa en Next.js 15 usando A
 
 ```
 src/
-├── auth.js                          # Configuración central de Auth.js
-│   └── providers, adapter, callbacks JWT
+├── auth.js                           # Configuración central de Auth.js
+│                                     # providers, PrismaAdapter, callbacks JWT
 ├── lib/
-│   ├── prisma.js                    # Instancia singleton de PrismaClient
-│   ├── actions.js                   # Server Actions: loginGoogle, loginGithub, logout
-│   ├── demo.js                      # Datos ficticios y flag DEMO_MODE
-│   └── session.js                   # getSession(): abstracción demo/real
+│   ├── prisma.js                     # Singleton de PrismaClient
+│   ├── actions.js                    # Server Actions: login y logout
+│   ├── demo.js                       # Flag DEMO_MODE y sesión ficticia
+│   └── session.js                    # getSession(): abstracción demo/real
 ├── app/
-│   ├── page.js                      # Home — descripción del proyecto
-│   ├── about/page.js                # Arquitectura y flujo OAuth
-│   ├── dashboard/page.js            # Ruta protegida por sesión
-│   ├── admin/page.js                # Ruta protegida por rol ADMIN
+│   ├── page.js                       # Home
+│   ├── about/page.js                 # Arquitectura del proyecto
+│   ├── dashboard/page.js             # Ruta protegida por sesión
+│   ├── admin/page.js                 # Ruta protegida por rol ADMIN
 │   └── auth/
-│       ├── signin/page.js           # Página de login personalizada
-│       ├── signout/page.js          # Página de logout
-│       └── error/page.js            # Página de error OAuth
-├── api/auth/[...nextauth]/route.js  # Handler de Auth.js
+│       ├── signin/page.js            # Login personalizado
+│       ├── signout/page.js           # Logout
+│       └── error/page.js             # Errores OAuth
+│   └── api/auth/[...nextauth]/
+│       └── route.js                  # Handler de Auth.js
 └── components/
-    └── header.js                    # Navegación con estado de sesión
+    └── header.js                     # Navegación con estado de sesión
 ```
 
-### Flujo de autenticación
+### Flujo OAuth
 
 ```
-Usuario → /auth/signin
-  → Server Action loginGithub() / loginGoogle()
-  → Auth.js redirige al proveedor OAuth
-  → Proveedor devuelve código a /api/auth/callback/[provider]
-  → Prisma Adapter crea/actualiza User + Account en PostgreSQL
-  → Auth.js genera JWT con { sub, role }
-  → Cookie segura HttpOnly → sesión activa
+/auth/signin
+  └── Server Action loginGithub() / loginGoogle()
+        └── Auth.js → redirección al proveedor
+              └── Callback /api/auth/callback/[provider]
+                    └── Prisma Adapter → crea o actualiza User + Account
+                          └── JWT generado con { sub, role }
+                                └── Cookie HttpOnly → sesión activa
 ```
 
 ### Control de roles
 
-El rol se persiste en la base de datos (`User.role`) y se inyecta en el JWT en el callback `jwt`. El callback `session` lo expone en `session.user.role`. Las rutas protegidas comprueban el rol en el servidor antes de renderizar.
+```js
+// src/auth.js — el rol se inyecta en el token en cada request
+async jwt({ token }) {
+  const user = await prisma.user.findUnique({ where: { id: token.sub } })
+  token.role = user?.role
+  return token
+}
 
----
-
-## Modo Demo
-
-El proyecto incluye un modo demo que permite ejecutar la aplicación **sin PostgreSQL ni credenciales OAuth**. Útil para desarrollo local rápido y capturas de portfolio.
-
-### Cómo funciona
-
-`NEXT_PUBLIC_DEMO_MODE=true` activa una sesión ficticia en `src/lib/session.js` mediante **dynamic import**: `@/auth` (y por tanto Prisma) **nunca se importa** en modo demo, eliminando cualquier dependencia de base de datos.
-
-```
-getSession()
-  ├── DEMO_MODE=true  → devuelve demoSession (sin tocar Prisma)
-  └── DEMO_MODE=false → dynamic import('@/auth') → auth() real
+// dashboard/page.js — verificación en servidor antes de renderizar
+const session = await getSession()
+if (!session) redirect('/')
+if (session.user.role !== 'ADMIN') redirect('/')
 ```
 
-### Usuario demo
+### Modo demo — decisión técnica
 
-```json
-{
-  "name": "Paco Gómez",
-  "email": "paco@example.com",
-  "role": "ADMIN"
+El modo demo usa `dynamic import` para garantizar que `@/auth` (y por tanto `PrismaClient`) **nunca se instancia** cuando `NEXT_PUBLIC_DEMO_MODE=true`. Un import estático habría crasheado en la inicialización del módulo aunque la función nunca se llamara.
+
+```js
+// src/lib/session.js
+export async function getSession() {
+  if (DEMO_MODE) return demoSession               // Prisma nunca se toca
+  const { auth } = await import('@/auth')         // lazy — solo en modo real
+  return auth()
 }
 ```
 
 ---
 
+## Retos y decisiones
+
+**Bug de providers invertidos**
+Al configurar Auth.js v5 los imports de `google` y `github` estaban cruzados — el provider nombrado `Google` apuntaba al módulo de GitHub y viceversa. El flujo OAuth funciona internamente porque Auth.js lo detecta por el `id` del provider, pero las páginas de signin personalizadas recibían el nombre incorrecto. Detectado al comparar el `provider` devuelto en el callback con el nombre del botón pulsado.
+
+**Instanciación de Prisma en módulos**
+En Next.js, los imports estáticos se resuelven en tiempo de carga del módulo, no en tiempo de ejecución de la función. Importar `auth` directamente habría instanciado `PrismaClient` aunque el código de la función lo ignorara con un `if`. La solución es `dynamic import` dentro de `getSession()`, que difiere la resolución hasta que la función se ejecuta — y en modo demo nunca se ejecuta esa rama.
+
+**Sesión en Server Components vs Client Components**
+Auth.js v5 expone `auth()` solo en servidor. Para no propagar el import de `@/auth` por toda la aplicación, se creó `getSession()` como punto de entrada único — cualquier componente que necesite la sesión lo hace a través de esta abstracción, que gestiona tanto el modo demo como el modo real.
+
+---
+
+## Aprendizajes
+
+- Auth.js v5 cambia significativamente respecto a v4: la configuración es un objeto exportado desde `auth.js`, no un array de opciones en `pages/api/auth`. Los handlers `GET` y `POST` se exportan directamente al route handler.
+- El `PrismaAdapter` requiere exactamente los modelos `User` y `Account` con los campos de la especificación de Auth.js. Cualquier campo faltante o renombrado rompe silenciosamente el callback de OAuth.
+- Los Server Actions de Next.js 15 simplifican el flujo de autenticación: `loginGoogle()` llama directamente a `signIn('google')` sin necesitar un endpoint `/api/auth/signin` propio.
+- `NEXT_PUBLIC_` expone la variable al cliente, pero también está disponible en servidor — útil para que un Server Component decida sin necesidad de una API route.
+
+---
+
 ## Instalación
 
-### Modo Demo (sin base de datos)
+### Modo demo — sin base de datos
 
 ```bash
-# 1. Clonar el repositorio
-git clone <url-del-repo>
-cd auth-main
-
-# 2. Instalar dependencias
+git clone <url-del-repo> && cd nxauth
 npm install
-
-# 3. Crear archivo de entorno
-cp .env.example .env
-# Asegúrate de que NEXT_PUBLIC_DEMO_MODE=true en el .env
-
-# 4. Arrancar
+cp .env.example .env          # NEXT_PUBLIC_DEMO_MODE=true ya está activo
 npm run dev
 ```
 
 Abre [http://localhost:3000](http://localhost:3000).
 
-### Modo Real (con PostgreSQL y OAuth)
+### Modo real — con PostgreSQL y OAuth
 
 ```bash
-# 1. Clonar e instalar
-git clone <url-del-repo>
-cd auth-main
+git clone <url-del-repo> && cd nxauth
 npm install
-
-# 2. Configurar entorno
 cp .env.example .env
-# Edita .env:
-#   NEXT_PUBLIC_DEMO_MODE=false
-#   DATABASE_URL=postgresql://...
-#   AUTH_SECRET=<genera con: npx auth secret>
-#   AUTH_GITHUB_ID / AUTH_GITHUB_SECRET
-#   AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET
+```
 
-# 3. Crear tablas en PostgreSQL
+Edita `.env`:
+
+```env
+NEXT_PUBLIC_DEMO_MODE=false
+DATABASE_URL="postgresql://usuario:password@localhost:5432/nxauth"
+AUTH_SECRET=""          # npx auth secret
+AUTH_GITHUB_ID=""
+AUTH_GITHUB_SECRET=""
+AUTH_GOOGLE_ID=""
+AUTH_GOOGLE_SECRET=""
+```
+
+```bash
 npx prisma db push
-
-# 4. Arrancar
 npm run dev
 ```
 
-### Credenciales OAuth
-
-**GitHub** — [github.com/settings/developers](https://github.com/settings/developers)
-- Application type: OAuth App
-- Callback URL: `http://localhost:3000/api/auth/callback/github`
-
-**Google** — [console.cloud.google.com](https://console.cloud.google.com)
-- Tipo: Aplicación web
-- URI de redireccionamiento: `http://localhost:3000/api/auth/callback/google`
-
----
-
-## Pantallas
-
-| Ruta | Descripción |
-|---|---|
-| `/` | Home con descripción del proyecto y stack |
-| `/about` | Arquitectura, flujo OAuth y decisiones técnicas |
-| `/auth/signin` | Login con Google y GitHub |
-| `/dashboard` | Perfil de usuario y datos de sesión (protegida) |
-| `/admin` | Panel de administración con tabla de usuarios (solo ADMIN) |
+**Callback URLs para los proveedores OAuth:**
+- GitHub: `http://localhost:3000/api/auth/callback/github`
+- Google: `http://localhost:3000/api/auth/callback/google`
 
 ---
 
@@ -166,8 +196,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?
-  role          String?   @default("USER")
+  role          String?   @default("USER")   // USER | ADMIN
   active        Boolean?  @default(true)
   accounts      Account[]
 }
@@ -178,8 +207,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  // ... campos OAuth estándar de Auth.js
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([provider, providerAccountId])
 }
 ```
@@ -189,9 +224,23 @@ model Account {
 ## Scripts
 
 ```bash
-npm run dev        # Servidor de desarrollo en localhost:3000
-npm run build      # Build de producción
-npm run start      # Servidor de producción
-npx prisma studio  # GUI para explorar la base de datos
-npx prisma db push # Sincronizar schema con la base de datos
+npm run dev         # Desarrollo en localhost:3000
+npm run build       # Build de producción
+npm run start       # Producción
+npx prisma studio   # GUI de base de datos
+npx prisma db push  # Sincronizar schema
+npx auth secret     # Generar AUTH_SECRET
 ```
+
+---
+
+## Rutas
+
+| Ruta | Acceso | Descripción |
+|---|---|---|
+| `/` | Público | Home y stack del proyecto |
+| `/about` | Público | Arquitectura y flujo OAuth |
+| `/auth/signin` | Público | Login con Google / GitHub |
+| `/dashboard` | Sesión requerida | Perfil e información de sesión |
+| `/admin` | Rol ADMIN | Panel de usuarios |
+| `/api/auth/[...nextauth]` | Auth.js | Handler OAuth interno |
