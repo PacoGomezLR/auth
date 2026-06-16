@@ -1,45 +1,54 @@
-// Los iconos disponibles en la carpeta /public
-// han sido obtenidos de https://authjs.dev/img/providers/google.svg y otros proveedores
-import { loginGoogle, loginGithub } from "@/lib/actions"
+import { loginGoogle, loginGithub } from '@/lib/actions'
+import { DEMO_MODE } from '@/lib/demo'
 
+const errorMessages = new Map([
+    ['OAuthSignin',        'Error al construir la URL de autorización.'],
+    ['OAuthCallback',      'Error al manejar la respuesta del proveedor OAuth.'],
+    ['OAuthCreateAccount', 'No se pudo crear el usuario en la base de datos.'],
+    ['EmailCreateAccount', 'No se pudo crear el usuario de correo electrónico.'],
+    ['Callback',           'Error en el callback de OAuth.'],
+    ['OAuthAccountNotLinked', 'Este email ya está registrado con otro proveedor.'],
+    ['EmailSignin',        'Comprueba tu dirección de correo electrónico.'],
+    ['CredentialsSignin',  'Credenciales incorrectas.'],
+    ['SessionRequired',    'Debes iniciar sesión para acceder.'],
+    ['Default',            'No se puede iniciar sesión.'],
+])
 
-// https://next-auth.js.org/configuration/pages#sign-in-page
-const errors = new Map();
-errors.set('OAuthSignin', "Error al construir una URL de autorización.");
-errors.set('OAuthCallback', "Error al manejar la respuesta de un proveedor de OAuth.");
-errors.set('OAuthCreateAccount', "No se pudo crear un usuario proveedor de OAuth en la base de datos.");
-errors.set('EmailCreateAccount', "No se pudo crear un usuario de proveedor de correo electrónico en la base de datos.");
-errors.set('Callback', "Error en la ruta del controlador de devolución de llamada de OAuth.");
-errors.set('OAuthAccountNotLinked', "Este email ya está registrado con otro proveedor.");
-errors.set('EmailSignin', "Comprueba tu dirección de correo electrónico.");
-errors.set('CredentialsSignin', "Fallo al iniciar sesion. Verifique que los datos que proporcionó sean correctos.");
-errors.set('SessionRequired', "Error al iniciar sesión. Verifique que los detalles que proporcionó sean correctos.");
-errors.set('Default', "No se puede iniciar sesión.");
+export default async function SignIn({ searchParams }) {
+    const { error } = await searchParams
 
+    return (
+        <>
+            <div className="signin-card">
+                <h1>Iniciar sesión</h1>
+                <p className="signin-subtitle">
+                    Accede con tu cuenta de Google o GitHub
+                </p>
 
-async function PaginaLogin({ searchParams }) {
+                {error && (
+                    <div className="signin-error">
+                        {errorMessages.get(error) ?? errorMessages.get('Default')}
+                    </div>
+                )}
 
-  const { error } = await searchParams
+                {DEMO_MODE && (
+                    <div className="demo-notice">
+                        <strong>Modo Demo activo.</strong> Los botones están desactivados.
+                        La autenticación real requiere PostgreSQL y credenciales OAuth configuradas.
+                    </div>
+                )}
 
-  return (
-    <>
-
-      <h1>Iniciar sesión</h1>
-      { error && <p>{errors.get(error)}</p>}
-      <form>
-
-        <button formAction={loginGoogle}>
-          <img src="/google.svg" alt="Google" />  Iniciar sesión con Google
-        </button>
-
-        <button formAction={loginGithub}>
-          <img src="/github.svg" alt="Github" /> Iniciar sesión con Github
-        </button>
-
-      </form>
-
-    </>
-  )
+                <form className="signin-form">
+                    <button formAction={DEMO_MODE ? undefined : loginGoogle} disabled={DEMO_MODE}>
+                        <img src="/google.svg" alt="Google" width={20} height={20} />
+                        Continuar con Google
+                    </button>
+                    <button formAction={DEMO_MODE ? undefined : loginGithub} disabled={DEMO_MODE}>
+                        <img src="/github.svg" alt="GitHub" width={20} height={20} />
+                        Continuar con GitHub
+                    </button>
+                </form>
+            </div>
+        </>
+    )
 }
-
-export default PaginaLogin

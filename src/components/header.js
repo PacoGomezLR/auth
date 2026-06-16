@@ -1,24 +1,31 @@
 import Link from 'next/link'
-import { auth } from "@/auth"
+import { getSession } from '@/lib/session'
+import { DEMO_MODE } from '@/lib/demo'
 
 async function Header() {
-    const session = await auth();
-    console.log(session);
+    const session = await getSession()
 
     return (
         <header>
-            <div>
+            <div className="header-nav">
                 <Link href="/">Inicio</Link>
-                {session?.user?.role == 'ADMIN'
-                    && <Link href="/admin">Admin panel</Link>}
+                <Link href="/about">About</Link>
                 <Link href="/dashboard">Dashboard</Link>
+                {session?.user?.role === 'ADMIN' && (
+                    <Link href="/admin">Admin</Link>
+                )}
             </div>
-            <nav>
-                {session
-                    ? <Link href="/auth/signout">SignOut</Link>
-                    : <Link href="/auth/signin">SignIn</Link>
-                }
-            </nav>
+            <div className="header-right">
+                {DEMO_MODE && (
+                    <span className="demo-badge">Demo Mode</span>
+                )}
+                <nav>
+                    {session
+                        ? <Link href="/auth/signout">Cerrar sesión</Link>
+                        : <Link href="/auth/signin">Iniciar sesión</Link>
+                    }
+                </nav>
+            </div>
         </header>
     )
 }
