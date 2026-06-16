@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getSession } from '@/lib/session'
+import { DEMO_MODE } from '@/lib/demo'
 
 export default async function Dashboard() {
     const session = await getSession()
@@ -16,6 +17,8 @@ export default async function Dashboard() {
               year: 'numeric',
           })
         : '—'
+
+    const signOutHref = DEMO_MODE ? '/' : '/auth/signout'
 
     return (
         <main className="dashboard">
@@ -76,7 +79,7 @@ export default async function Dashboard() {
                         Panel de administración
                     </Link>
                 )}
-                <Link href="/auth/signout" className="btn btn-secondary">
+                <Link href={signOutHref} className="btn btn-secondary">
                     Cerrar sesión
                 </Link>
             </div>

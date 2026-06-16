@@ -5,6 +5,8 @@ import { DEMO_MODE } from '@/lib/demo'
 async function Header() {
     const session = await getSession()
 
+    const signOutHref = DEMO_MODE ? '/' : '/auth/signout'
+
     return (
         <header>
             <div className="header-nav">
@@ -31,7 +33,7 @@ async function Header() {
                             className="header-avatar"
                         />
                         <span className="header-username">{session.user.name}</span>
-                        <Link href="/auth/signout" className="header-signout">Salir</Link>
+                        <Link href={signOutHref} className="header-signout">Salir</Link>
                     </div>
                 ) : (
                     <Link href="/auth/signin" className="btn btn-primary btn-sm">
