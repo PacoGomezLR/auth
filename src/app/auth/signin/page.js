@@ -2,16 +2,16 @@ import { loginGoogle, loginGithub } from '@/lib/actions'
 import { DEMO_MODE } from '@/lib/demo'
 
 const errorMessages = new Map([
-    ['OAuthSignin',        'Error al construir la URL de autorización.'],
-    ['OAuthCallback',      'Error al manejar la respuesta del proveedor OAuth.'],
-    ['OAuthCreateAccount', 'No se pudo crear el usuario en la base de datos.'],
-    ['EmailCreateAccount', 'No se pudo crear el usuario de correo electrónico.'],
-    ['Callback',           'Error en el callback de OAuth.'],
-    ['OAuthAccountNotLinked', 'Este email ya está registrado con otro proveedor.'],
-    ['EmailSignin',        'Comprueba tu dirección de correo electrónico.'],
-    ['CredentialsSignin',  'Credenciales incorrectas.'],
-    ['SessionRequired',    'Debes iniciar sesión para acceder.'],
-    ['Default',            'No se puede iniciar sesión.'],
+    ['OAuthSignin',           'Error al construir la URL de autorización.'],
+    ['OAuthCallback',         'Error al gestionar la respuesta del proveedor.'],
+    ['OAuthCreateAccount',    'No se pudo crear el usuario en la base de datos.'],
+    ['EmailCreateAccount',    'No se pudo crear el usuario de correo electrónico.'],
+    ['Callback',              'Error en el callback de OAuth.'],
+    ['OAuthAccountNotLinked', 'Este correo ya está registrado con otro proveedor.'],
+    ['EmailSignin',           'Comprueba tu dirección de correo electrónico.'],
+    ['CredentialsSignin',     'Credenciales incorrectas.'],
+    ['SessionRequired',       'Debes iniciar sesión para acceder.'],
+    ['Default',               'No se puede iniciar sesión.'],
 ])
 
 export default async function SignIn({ searchParams }) {
@@ -20,6 +20,7 @@ export default async function SignIn({ searchParams }) {
     return (
         <>
             <div className="signin-card">
+                <p className="signin-brand">NXAuth</p>
                 <h1>Iniciar sesión</h1>
                 <p className="signin-subtitle">
                     Accede con tu cuenta de Google o GitHub
@@ -33,8 +34,7 @@ export default async function SignIn({ searchParams }) {
 
                 {DEMO_MODE && (
                     <div className="demo-notice">
-                        <strong>Modo Demo activo.</strong> Los botones están desactivados.
-                        La autenticación real requiere PostgreSQL y credenciales OAuth configuradas.
+                        Modo demo activo. Explora la aplicación con datos de ejemplo.
                     </div>
                 )}
 

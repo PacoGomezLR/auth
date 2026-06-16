@@ -56,10 +56,61 @@ header {
     gap: 4px;
 }
 
+.header-logo {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -.02em;
+    margin-right: 8px;
+    padding: 6px 4px;
+}
+
+.header-logo:hover {
+    color: var(--color-primary-hover);
+    background: transparent;
+}
+
+.header-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
 .header-right {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border);
+    display: block;
+}
+
+.header-username {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.header-signout {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    padding: 4px 8px;
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.82rem;
 }
 
 /* ── Links ── */
@@ -200,6 +251,15 @@ p {
 }
 
 /* ── Home ── */
+.hero-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--color-primary);
+    margin-bottom: 12px;
+}
+
 .hero {
     padding: 48px 0 40px;
     border-bottom: 1px solid var(--color-border);
@@ -228,19 +288,31 @@ p {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 20px 20px 20px 16px;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: flex-start;
+    gap: 14px;
     box-shadow: var(--shadow);
 }
 
-.stack-icon {
-    font-size: 1.5rem;
+.stack-indicator {
+    width: 3px;
+    height: 36px;
+    border-radius: 99px;
+    background: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.stack-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .stack-card strong {
     font-size: 0.95rem;
+    color: var(--color-text);
 }
 
 .stack-card span {
@@ -381,16 +453,50 @@ code {
     margin-bottom: 24px;
 }
 
-.session-json {
-    background: #f8fafc;
+.session-fields {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    padding: 16px;
-    font-size: 0.82rem;
-    overflow: auto;
-    margin-top: 12px;
-    line-height: 1.6;
+    overflow: hidden;
+}
+
+.session-field {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+    gap: 16px;
+}
+
+.session-field:last-child {
+    border-bottom: none;
+}
+
+.session-field:nth-child(even) {
+    background: #fafbfc;
+}
+
+.session-field-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--color-text-muted);
+    min-width: 160px;
+    flex-shrink: 0;
+}
+
+.session-field-value {
+    font-size: 0.88rem;
     color: var(--color-text);
+}
+
+.session-field-mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
 }
 
 .dashboard-actions {
@@ -476,6 +582,31 @@ code {
     color: var(--color-text);
 }
 
+.td-email {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+/* ── Provider badges ── */
+.provider-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 99px;
+    letter-spacing: .04em;
+}
+
+.provider-github {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.provider-google {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
 .admin-table tr:last-child td {
     border-bottom: none;
 }
@@ -505,6 +636,15 @@ section.auth {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.signin-brand {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -.02em;
+    margin-bottom: 4px;
 }
 
 .signin-card h1 {
